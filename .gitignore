@@ -1,0 +1,21 @@
+# Secrets & local config
+img_compressor/config.php
+img_compressor/config.local.php
+
+# Backups (generated at runtime)
+img_compressor/assets/backups/*
+!img_compressor/assets/backups/.gitkeep
+!img_compressor/assets/backups/.htaccess
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Test images (optional — remove if you want to track samples)
+img/documents/*
+!img/documents/.gitkeep
+public/img/documents/*
+!public/img/documents/.gitkeep

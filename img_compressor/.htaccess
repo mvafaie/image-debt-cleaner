@@ -1,0 +1,22 @@
+DirectoryIndex index.php
+
+# Block direct access to PHP internals if the interpreter fails
+<FilesMatch "^(config(\.local)?|bootstrap|security|i18n)\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block source, views, and translation files from direct download
+    RewriteRule ^(src|views|lang)/ - [F,L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
