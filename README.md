@@ -6,7 +6,7 @@
 ![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-Originally built to clean up years of oversized uploads in a legacy PHP project, but works with any PHP application.
+A drop-in admin tool for PHP projects that have accumulated years of unoptimized image uploads.
 
 No framework required.
 
@@ -15,6 +15,8 @@ No database required.
 No ImageMagick required.
 
 No deployment changes required.
+
+copy one folder, set a password, open in the browser.
 
 ---
 
@@ -28,108 +30,6 @@ No deployment changes required.
 
 ![Single file compression view](img_compressor/assets/docs/single.png)
 
-```text
-Largest Images
-      ↓
-Preview Compression Levels
-      ↓
-Compare File Sizes
-      ↓
-Backup Original
-      ↓
-Save Optimized Version
-```
-
----
-
-## Why This Exists
-
-I inherited a legacy PHP application where users had been uploading images for years.
-
-There were no upload limits, no compression pipeline, and no cleanup process.
-
-The application worked fine, but storage usage kept growing.
-
-Thousands of images had accumulated over time, many of them between 3 MB and 10 MB each.
-
-Backups became larger.
-
-Deployments became slower.
-
-Storage costs increased.
-
-Pages loaded heavier images than necessary.
-
-I needed a practical solution that could be deployed immediately without redesigning the existing upload workflow.
-
-So I built this tool.
-
-It worked — and I open-sourced it because this problem is everywhere.
-
----
-
-## Does This Sound Familiar?
-
-This tool may help if:
-
-* Your project contains years of uploaded images
-* Storage usage keeps growing
-* Backups are becoming too large
-* Product, document, or gallery pages load oversized images
-* You inherited a legacy application with no image optimization process
-* You need a quick cleanup solution before implementing a long-term media strategy
-* You want an admin-only utility for image optimization
-
----
-
-## Features
-
-### Image Discovery
-
-* Scan directories recursively
-* Detect oversized images
-* Sort by file size
-* Thumbnail previews
-* Configurable size thresholds
-
-### Compression Preview
-
-* Multiple quality presets
-* Before/after comparison
-* Real-time size estimation
-* Compression statistics
-* Visual quality inspection
-
-### Batch Processing
-
-* Compress multiple images at once
-* Progress tracking
-* Bulk selection
-* Consistent quality settings
-
-### Safety Features
-
-* Optional backup creation
-* File validation
-* Path protection (`realpath` validation under configured scan roots)
-* Session-based authentication
-* CSRF protection on login and save
-* Login rate limiting (brute-force lockout)
-* Upload size limits on save API
-
-### User Experience
-
-* Responsive interface
-* Dark mode
-* English and Persian language support
-* RTL support
-* Sticky progress notifications
-* Image lightbox viewer
-
----
-
-## Before & After
-
 Example result:
 
 ```text
@@ -140,28 +40,30 @@ Reduction:      88%
 
 Real-world cleanup projects often recover several gigabytes of storage from old uploads.
 
+```text
+Largest Images
+      ↓
+Preview Compression Levels
+      ↓
+Compare File Sizes
+      ↓
+Backup Original (optional)
+      ↓
+Save Optimized Version
+```
+
 ---
-
-## Requirements
-
-* PHP 8.1 or newer
-* Apache, Nginx, or PHP built-in server
-* Modern browser with Canvas API support
-
-Optional:
-
-* Writable backup directory
-
----
-
 ## Quick Start
 
+**Requirements:** PHP 8.1+, Apache/Nginx/built-in server, modern browser.
+
 1. Copy the `img_compressor/` directory to your server
-2. Configure a password
-3. Open the tool in your browser
-4. Start with the largest images
-5. Preview results
-6. Save optimized versions
+2. Configure the password, allowed_user_agent, and scan_paths in img_compressor/config.example.php.
+3. Rename config.example.php to config.php.
+4. Open the tool in your browser
+5. Start with the largest images
+6. Preview results
+7. Save optimized versions
 
 ---
 
@@ -178,22 +80,35 @@ public/                          ← document root (auto-detected)
 ├── uploads/
 └── admin/tools/img_compressor/  ← tool works here too
 ```
-
 `scan_paths` are relative to the **document root**, not the tool folder.
 
-### Configure Access
+---
 
-Edit:
+### Configuration
 
-```php
-img_compressor/config.php
-```
-
-Set a secure password:
+All settings live in `img_compressor/config.php`. The only required change is the password.
 
 ```php
-'password' => 'your-secure-password',
+// img_compressor/config.php
+
+'password'              => 'your-secure-password',
+'allowed_user_agent'    => 'allowed_user_agent',   //  You can search 'my user agent' on Google."
+'scan_paths'            => ['img/', 'uploads/'],   // relative to document root
+'min_size_kb'           => 200,                    // ignore files smaller than this
 ```
+
+**Optional overrides** (only needed behind a reverse proxy or non-standard setup):
+
+ Path resolution (auto-detected by default)
+```php
+'document_root'      => '/var/www/public',
+'base_path'          => '/admin/tools/img_compressor/',
+'assets_url_prefix'  => '/',
+```
+
+Move secrets to `config.local.php` (see `config.example.php`).
+
+---
 
 ### Launch
 
@@ -204,21 +119,71 @@ https://your-domain.com/img_compressor/
 https://your-domain.com/admin/tools/img_compressor/
 ```
 
-Asset URLs, API calls, and image paths adjust automatically. Override only if needed:
+---
 
-```php
-'document_root' => '/var/www/public',           // absolute web root
-'base_path' => '/admin/tools/img_compressor/',  // URL prefix behind reverse proxy
-'assets_url_prefix' => '/',                     // public URL prefix for images
+## Usage
+
+1. **Log in** with the password you configured.
+2. **Browse** — images are sorted by size, largest first. Thumbnails load inline.
+3. **Preview** — open any image to compare quality levels and see estimated file sizes before saving.
+4. **Batch compress** — select multiple images, pick a quality setting, compress all at once.
+5. **Save** — optionally create a timestamped backup before overwriting the original.
+
+Compression runs in the browser (Canvas API). The server only handles auth, scanning, backups, and writing the final file — no server-side image library required.
+
+---
+
+## Features at a Glance
+
+| Feature | Details |
+|---|---|
+| Image discovery | Recursive scan, sort by size, thumbnail preview, configurable threshold |
+| Compression preview | Multiple quality presets, before/after size comparison |
+| Batch processing | Bulk selection, progress tracking, consistent quality across files |
+| Safety | Backup creation, path traversal protection, CSRF tokens, rate-limited login |
+| UI | Dark mode, responsive, English + Persian (RTL) |
+
+---
+
+## Project Structure
+
+```text
+img_compressor/
+├── index.php            # front controller — entry point
+├── bootstrap.php        # autoload & dependency wiring
+├── config.php           # your settings (gitignored)
+├── config.example.php   # all options with comments
+├── views/app.php        # HTML shell
+├── src/
+│   ├── Config/          # AppConfig
+│   ├── Domain/          # ImageFile, ByteFormatter
+│   ├── Http/            # Request, Router, JsonResponse
+│   ├── Application/     # use cases: List, Save, ShowApp
+│   └── Infrastructure/  # PathGuard, FileScanner, SessionAuth, I18n
+├── lang/
+│   ├── en.php
+│   └── fa.php
+└── assets/
+    ├── css/
+    ├── js/
+    └── backups/
 ```
 
-The API endpoint is a relative `index.php` — resolved against the current page URL, so it works in any subdirectory. If the server returns a non-JSON response (e.g. 404 HTML), the UI shows a clear error like `Server error (HTTP 404)` instead of a JSON parse failure.
+---
 
-Or using PHP's built-in server:
+## API Endpoints
 
-```bash
-php -S localhost:8080 -t /path/to/public
-```
+All via `index.php?action=…`:
+
+| Action | Method | Auth | Description |
+|---|---|---|---|
+| `check` | GET | — | Session status, CSRF token, i18n payload |
+| `login` | POST | — | Authenticate |
+| `logout` | GET | — | Destroy session |
+| `locale` | GET/POST | — | Switch language (`lang=en\|fa`) |
+| `files` | GET | ✓ | List oversized images (paginated) |
+| `save` | POST | ✓ | Write compressed image (+ optional backup) |
+| *(none)* | GET | — | Render the HTML UI |
 
 ---
 
@@ -270,23 +235,21 @@ Browser (vanilla JS)
  ├─ Image preview & compression (Canvas API)
  ├─ Bulk operations
  └─ Upload optimized image (base64)
-
-             │  ?action=login|files|save|check|locale
+             │
              ▼
-
 img_compressor/
- ├── index.php          → front controller
- ├── bootstrap.php      → wiring & autoload
- ├── views/app.php      → HTML shell
+ ├── index.php       → front controller
+ ├── bootstrap.php   → wiring & autoload
+ ├── views/app.php   → HTML shell
  └── src/
-      ├── Http/         → Request, Router, JSON responses
-      ├── Application/  → use cases (one action per class)
-      ├── Domain/       → ImageFile, formatters
+      ├── Http/            → Request, Router, JSON responses
+      ├── Application/     → use cases (one action per class)
+      ├── Domain/          → ImageFile, formatters
       └── Infrastructure/
-           ├── PathGuard    → all filesystem security
-           ├── FileScanner  → directory scan
-           ├── BackupStore  → timestamped backups
-           └── SessionAuth  → login, CSRF, sessions
+           ├── PathGuard   → all filesystem security
+           ├── FileScanner → directory scan
+           ├── BackupStore → timestamped backups
+           └── SessionAuth → login, CSRF, sessions
 ```
 
 Full design rationale, security model, and extension guide: **[ARCHITECTURE.md](ARCHITECTURE.md)**
@@ -317,89 +280,11 @@ Full design rationale, security model, and extension guide: **[ARCHITECTURE.md](
 
 Recommendations:
 
-* Restrict access to administrators only
 * Use HTTPS in production
 * Store backups outside public access when possible
 * Use a strong password (hashed, not plain text in repo)
-
----
-
-## Project Structure
-
-```text
-image-compressor/
-├── ARCHITECTURE.md          # design rationale & extension guide
-├── README.md
-└── img_compressor/
-    ├── index.php            # front controller (entry point)
-    ├── bootstrap.php        # autoload & dependency wiring
-    ├── config.php           # deployment settings (gitignored)
-    ├── config.example.php
-    ├── views/
-    │   └── app.php          # HTML shell
-    ├── src/
-    │   ├── Config/          # AppConfig
-    │   ├── Domain/          # ImageFile, ByteFormatter
-    │   ├── Http/            # Request, Router, JsonResponse
-    │   ├── Application/     # use cases (List, Save, ShowApp)
-    │   └── Infrastructure/  # PathGuard, FileScanner, SessionAuth, I18n
-    ├── lang/
-    │   ├── en.php
-    │   └── fa.php
-    └── assets/
-        ├── css/
-        ├── js/
-        └── backups/
-```
-
----
-
-## Roadmap
-
-* [ ] WebP export support
-* [ ] AVIF export support
-* [ ] Folder-level statistics dashboard
-* [ ] Automatic backup cleanup
-* [ ] Command-line interface (CLI)
-* [ ] Drag-and-drop optimization
-* [ ] Compression history
-* [ ] Multi-user authentication
-* [ ] Scheduled optimization tasks
-
----
-
-## Documentation
-
-| Document | Contents |
-|----------|----------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Layer design, request flow, security model, extension guide |
-| `config.example.php` | All configuration options with comments |
-| `lang/en.php`, `lang/fa.php` | Translation strings and locale metadata |
-
-### API endpoints
-
-All endpoints use `index.php?action=…`:
-
-| Action | Method | Auth | Description |
-|--------|--------|------|-------------|
-| `check` | GET | — | Session status, CSRF token, i18n payload |
-| `login` | POST | — | Authenticate with password |
-| `logout` | GET | — | Destroy session |
-| `locale` | GET/POST | — | Switch language (`lang=en\|fa`) |
-| `files` | GET | ✓ | List oversized images (paginated) |
-| `save` | POST | ✓ | Write compressed image (+ optional backup) |
-| *(none)* | GET | — | Render the HTML UI |
-
----
-
-## Limitations
-
-* Compression output is JPEG
-* Transparent PNG images may lose transparency
-* Extremely large images may exceed browser memory limits
-* Backup files are not automatically removed
-* Not intended as a replacement for a complete media management system
-
+* Very large images may hit browser memory limits
+* Output format is JPEG only (WebP/AVIF planned)
 ---
 
 ## Contributing
