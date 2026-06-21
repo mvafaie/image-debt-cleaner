@@ -316,6 +316,42 @@ Instead of keeping the tool private, I decided to share it with the community.
 If it helps you recover storage space, simplify backups, or improve performance, then it has achieved its purpose.
 
 ---
+## Roadmap
+
+### Infrastructure & Deployment
+- [ ] Docker deployment
+- [ ] Queue based image processing
+- [ ] REST API documentation
+- [ ] S3 / MinIO storage support
+- [ ] Webhook support for async jobs
+
+### Access Control & Management
+- [ ] Permission Base
+- [ ] Image processing history
+
+### Algorithm-Based Duplicate Detection
+- [ ] Duplicate Detection
+- [ ] Average Hash (aHash)
+- [ ] Difference Hash (dHash)
+- [ ] Perceptual Hash (pHash)
+- [ ] Wavelet Hash (wHash)
+- [ ] Histogram comparison
+- [ ] Structural Similarity Index (SSIM)
+
+### AI-Based Duplicate Detection
+- [ ] Detect duplicate images using AI embeddings
+- [ ] CLIP embeddings support
+- [ ] Semantic image similarity search
+- [ ] Near-duplicate image detection
+- [ ] Similar image recommendation
+
+### Advanced AI Features
+- [ ] Background removal
+- [ ] Object segmentation
+- [ ] Face detection
+- [ ] OCR text detection
+- [ ] Watermark detection and removal
+
 
 ## License
 
